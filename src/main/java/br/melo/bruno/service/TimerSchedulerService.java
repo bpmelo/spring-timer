@@ -5,7 +5,6 @@ import org.springframework.scheduling.TaskScheduler;
 import org.springframework.stereotype.Service;
 
 import javax.validation.constraints.NotNull;
-import java.text.ParseException;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -13,22 +12,19 @@ import java.util.UUID;
 import java.util.concurrent.ScheduledFuture;
 
 @Service
-public class ScheduleService implements IScheduleService {
+public class TimerSchedulerService implements ITimerSchedulerService<Map<String, String>> {
 
     @Autowired
     TaskScheduler scheduler;
 
-    @Autowired
-    ITimerService<ScheduleContext> timerService;
-
     private Map<UUID, ScheduledFuture> runners = new HashMap<>();
-    private Map<UUID, ScheduleContext> contexts =  new HashMap<>();
+    private Map<UUID, TimerSchedulerContext> contexts =  new HashMap<>();
 
     private UUID generateUUID() {
         return UUID.randomUUID();
     }
 
-    private void context(UUID _uuid, ScheduleContext _context) {
+    private void context(UUID _uuid, TimerSchedulerContext _context) {
         contexts.put(_uuid, _context);
     }
 
@@ -45,34 +41,35 @@ public class ScheduleService implements IScheduleService {
         runners.remove(_uuid);
     }
 
-    private ScheduleContext createContext(Long _timer) {
-        return new ScheduleContext(_timer);
+    private TimerSchedulerContext createContext(Long _timer, ITimerScheduler _callback) {
+        return new TimerSchedulerContext(_timer, _callback);
     }
 
 
-    private void notifyStarted(ScheduleContext _context) {
+    private void notifyStarted(TimerSchedulerContext _context) {
         if (!_context.started()) {
             _context.start();
-            timerService.started(_context);
+            _context.callback().started(_context);
         }
     }
 
     private ScheduledFuture createSchedule(
             UUID _uuid,
             Date _startDateTime,
-            Long _delay) {
+            Long _delay,
+            ITimerScheduler callback) {
         ScheduledFuture future = scheduler.scheduleWithFixedDelay(
                 ()->{
-                    ScheduleContext context = context(_uuid);
+                    TimerSchedulerContext context = context(_uuid);
                     notifyStarted(context);
                     if (context.zeroed()) {
                         context.end();
-                        timerService.ended(context);
+                        callback.ended(context);
                         cancel(_uuid);
                         removeContext(_uuid);
                     }
                     else {
-                        timerService.beat(context);
+                        callback.beat(context);
                         context.beat();
                     }
                 },
@@ -83,15 +80,16 @@ public class ScheduleService implements IScheduleService {
     }
 
     @Override
-    public ScheduleContext context(@NotNull UUID _uuid) {
+    public TimerSchedulerContext context(@NotNull UUID _uuid) {
         return this.contexts.get(_uuid);
     }
 
     @Override
-    public UUID restart(@NotNull UUID _uuid, @NotNull ScheduleSettings _settings) {
+    public UUID restart(@NotNull UUID _uuid, @NotNull TimerSchedulerSettings _settings) {
         cancel(_uuid);
         context(_uuid).reset(_settings.getTime());
-        ScheduledFuture rescheduledFuture = this.createSchedule(_uuid, _settings.getStartDateTime(), _settings.getDelay());
+        ITimerScheduler callback = context(_uuid).callback();
+        ScheduledFuture rescheduledFuture = this.createSchedule(_uuid, _settings.getStartDateTime(), _settings.getDelay(), callback);
         runner(_uuid, rescheduledFuture);
         return _uuid;
     }
@@ -99,14 +97,17 @@ public class ScheduleService implements IScheduleService {
     @Override
     public void stop(@NotNull UUID _uuid) {
         this.cancel(_uuid);
+        TimerSchedulerContext _context = context(_uuid);
+        _context.stop();
+        _context.callback().stopped(_context);
         removeContext(_uuid);
     }
 
     @Override
-    public UUID schedule(@NotNull ScheduleSettings _settings) throws ParseException {
+    public UUID schedule(@NotNull TimerSchedulerSettings _settings, @NotNull ITimerScheduler _callback) {
         UUID uuid = generateUUID();
-        context(uuid, createContext(_settings.getTime()));
-        ScheduledFuture future = createSchedule(uuid, _settings.getStartDateTime(), _settings.getDelay());
+        context(uuid, createContext(_settings.getTime(), _callback));
+        ScheduledFuture future = createSchedule(uuid, _settings.getStartDateTime(), _settings.getDelay(), _callback);
         runner(uuid, future);
         return uuid;
     }

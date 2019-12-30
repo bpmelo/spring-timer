@@ -10,12 +10,12 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 
 @Configuration
 @EnableScheduling
-public class ScheduleConfig {
+public class TimerSchedulerConfig {
 
-    @Value("${application.scheduler.poolsize:10}")
+    @Value("${timer.scheduler.poolsize:10}")
     private int _SCHEDULER_POOL_SIZE;
 
-    @Value("${application.scheduler.name:SCHEDULER}")
+    @Value("${timer.scheduler.name:SCHEDULER}")
     private String _SCHEDULER_NAME;
 
     @Bean

@@ -1,17 +1,34 @@
 package br.melo.bruno.service;
 
-public class ScheduleContext {
+public class TimerSchedulerContext<T> {
 
     private Long time;
     private Long count;
     private Boolean started;
     private Boolean ended;
+    private Boolean stopped;
+    private T properties;
+    private ITimerScheduler callback;
 
-    public ScheduleContext(Long _time) {
+    public TimerSchedulerContext(Long _time, ITimerScheduler _callback) {
         this.time = _time;
         this.count = this.time;
         this.started = Boolean.FALSE;
         this.ended = Boolean.FALSE;
+        this.stopped = Boolean.FALSE;
+        this.callback = _callback;
+    }
+
+    public ITimerScheduler callback() {
+        return this.callback;
+    }
+
+    public T getProperties() {
+        return this.properties;
+    }
+
+    public void setProperties(T _properties) {
+        this.properties = _properties;
     }
 
     public Boolean started() {
@@ -20,6 +37,10 @@ public class ScheduleContext {
 
     public Boolean ended() {
         return this.ended;
+    }
+
+    public Boolean stopped() {
+        return this.stopped;
     }
 
     public void reset(Long _time) {
@@ -46,6 +67,10 @@ public class ScheduleContext {
 
     public void end() {
         this.ended = Boolean.TRUE;
+    }
+
+    public void stop() {
+        this.stopped = Boolean.TRUE;
     }
 
 }
