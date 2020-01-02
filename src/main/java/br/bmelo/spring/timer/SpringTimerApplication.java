@@ -1,4 +1,4 @@
-package br.melo.bruno;
+package br.bmelo.spring.timer;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

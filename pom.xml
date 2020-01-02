@@ -8,10 +8,10 @@
 		<version>2.2.1.RELEASE</version>
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
-	<groupId>br.melo.bruno</groupId>
-	<artifactId>springtimer</artifactId>
+	<groupId>br.bpmelo.spring.timer</groupId>
+	<artifactId>br-bpmelo-spring-timer</artifactId>
 	<version>0.0.1</version>
-	<name>spring-timer</name>
+	<name>bpmelo-spring-timer</name>
 	<description>Spring Boot Countdown scheduled tasks timer</description>
 
 	<properties>
@@ -20,10 +20,6 @@
 	</properties>
 
 	<dependencies>
-<!--		<dependency>-->
-<!--			<groupId>org.springframework.boot</groupId>-->
-<!--			<artifactId>spring-boot-starter-web</artifactId>-->
-<!--		</dependency>-->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter</artifactId>
@@ -52,14 +48,5 @@
 			<optional>true</optional>
 		</dependency>
 	</dependencies>
-
-	<build>
-		<plugins>
-			<plugin>
-				<groupId>org.springframework.boot</groupId>
-				<artifactId>spring-boot-maven-plugin</artifactId>
-			</plugin>
-		</plugins>
-	</build>
 
 </project>

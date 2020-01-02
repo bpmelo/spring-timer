@@ -1,4 +1,4 @@
-package br.melo.bruno.service;
+package br.bmelo.spring.timer.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.TaskScheduler;
@@ -12,7 +12,7 @@ import java.util.UUID;
 import java.util.concurrent.ScheduledFuture;
 
 @Service
-public class TimerSchedulerService implements ITimerSchedulerService<Map<String, String>> {
+public class TimerSchedulerService implements ITimerSchedulerService {
 
     @Autowired
     TaskScheduler scheduler;
@@ -79,9 +79,18 @@ public class TimerSchedulerService implements ITimerSchedulerService<Map<String,
         return future;
     }
 
-    @Override
-    public TimerSchedulerContext context(@NotNull UUID _uuid) {
+    private TimerSchedulerContext context(@NotNull UUID _uuid) {
         return this.contexts.get(_uuid);
+    }
+
+    @Override
+    public Map properties(@NotNull UUID _uuid) {
+        return this.contexts.get(_uuid).getProperties();
+    }
+
+    @Override
+    public void properties(@NotNull UUID _uuid, Map _properties) {
+        this.contexts.get(_uuid).setProperties(_properties);
     }
 
     @Override

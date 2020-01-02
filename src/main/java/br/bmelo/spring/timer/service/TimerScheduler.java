@@ -1,9 +1,9 @@
-package br.melo.bruno.service;
+package br.bmelo.spring.timer.service;
 
 import org.springframework.stereotype.Service;
 
 @Service
-public class TimerScheduler implements ITimerScheduler<TimerSchedulerContext> {
+public class TimerScheduler implements ITimerScheduler {
 
     @Override
     public void ended(TimerSchedulerContext _context) {

@@ -1,4 +1,4 @@
-package br.melo.bruno.config;
+package br.bmelo.spring.timer.config;
 
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;

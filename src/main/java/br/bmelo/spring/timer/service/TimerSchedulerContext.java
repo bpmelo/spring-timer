@@ -1,14 +1,17 @@
-package br.melo.bruno.service;
+package br.bmelo.spring.timer.service;
 
-public class TimerSchedulerContext<T> {
+import java.util.HashMap;
+import java.util.Map;
+
+public class TimerSchedulerContext {
 
     private Long time;
     private Long count;
     private Boolean started;
     private Boolean ended;
     private Boolean stopped;
-    private T properties;
     private ITimerScheduler callback;
+    private Map properties;
 
     public TimerSchedulerContext(Long _time, ITimerScheduler _callback) {
         this.time = _time;
@@ -17,18 +20,19 @@ public class TimerSchedulerContext<T> {
         this.ended = Boolean.FALSE;
         this.stopped = Boolean.FALSE;
         this.callback = _callback;
+        properties = new HashMap();
+    }
+
+    public void setProperties(Map _properties) {
+        properties = _properties;
+    }
+
+    public Map getProperties() {
+        return properties;
     }
 
     public ITimerScheduler callback() {
         return this.callback;
-    }
-
-    public T getProperties() {
-        return this.properties;
-    }
-
-    public void setProperties(T _properties) {
-        this.properties = _properties;
     }
 
     public Boolean started() {

@@ -1,4 +1,4 @@
-package br.melo.bruno.service;
+package br.bmelo.spring.timer.service;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
