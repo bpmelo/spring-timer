@@ -26,19 +26,19 @@ class ContextTest implements ITimerScheduler {
 	@Test
 	void contextTest() {
 		Calendar calendar = Calendar.getInstance();
+
+		Map<String, String> properties = new HashMap<>();
+		properties.put("_CUSTOM_CONTEXT_KEY", "_CUSTOM_CONTEXT_VALUE");
+
 		UUID uuid = timerSchedulerService.schedule(
 				new TimerSchedulerSettings(
 						calendar.getTime(),
 						2L,
 						1000L
 				),
-				this
+				this,
+				properties
 		);
-
-		Map<String, String> properties = new HashMap<>();
-		properties.put("_CUSTOM_CONTEXT_KEY", "_CUSTOM_CONTEXT_VALUE");
-
-		timerSchedulerService.properties(uuid, properties);
 
 		await().
 				atMost(2, TimeUnit.SECONDS).
@@ -52,19 +52,19 @@ class ContextTest implements ITimerScheduler {
 	}
 
 	@Override
-	public void ended(TimerSchedulerContext _context) {
+	public void ended(Map _context) {
 	}
 
 	@Override
-	public void stopped(TimerSchedulerContext _context) {
+	public void stopped(Map _context) {
 	}
 
 	@Override
-	public void started(TimerSchedulerContext _context) {
+	public void started(Map _context) {
 		started = Boolean.TRUE;
 	}
 
 	@Override
-	public void beat(TimerSchedulerContext _context) {
+	public void beat(Map _context) {
 	}
 }

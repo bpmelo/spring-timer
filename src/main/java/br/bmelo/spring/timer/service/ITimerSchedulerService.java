@@ -8,9 +8,7 @@ public interface ITimerSchedulerService {
 
     public Map properties(@NotNull UUID _uuid);
 
-    public void properties(@NotNull UUID _uuid, Map _properties);
-
-    public UUID schedule(@NotNull TimerSchedulerSettings _settings, ITimerScheduler _callback);
+    public UUID schedule(@NotNull TimerSchedulerSettings _settings, ITimerScheduler _callback, @NotNull Map _properties);
 
     public UUID restart(@NotNull UUID _uuid, @NotNull TimerSchedulerSettings _settings);
 

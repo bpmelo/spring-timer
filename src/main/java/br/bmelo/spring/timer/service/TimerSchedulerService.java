@@ -41,19 +41,24 @@ public class TimerSchedulerService implements ITimerSchedulerService {
         runners.remove(_uuid);
     }
 
-    private TimerSchedulerContext createContext(Long _timer, ITimerScheduler _callback) {
-        return new TimerSchedulerContext(_timer, _callback);
+    private TimerSchedulerContext createContext(Long _timer, ITimerScheduler _callback, Map _properties) {
+        return new TimerSchedulerContext(_timer, _callback, _properties);
     }
 
 
     private void notifyStarted(TimerSchedulerContext _context) {
-        if (!_context.started()) {
-            _context.start();
-            _context.callback().started(_context);
-        }
+        _context.start();
+        _context.callback().started(_context.getProperties());
     }
 
-    private ScheduledFuture createSchedule(
+    private void contextZeroed(TimerSchedulerContext _context, UUID _uuid, ITimerScheduler _callback) {
+        _context.end();
+        _callback.ended(_context.getProperties());
+        cancel(_uuid);
+        removeContext(_uuid);
+    }
+
+    private synchronized ScheduledFuture createSchedule(
             UUID _uuid,
             Date _startDateTime,
             Long _delay,
@@ -61,17 +66,16 @@ public class TimerSchedulerService implements ITimerSchedulerService {
         ScheduledFuture future = scheduler.scheduleWithFixedDelay(
                 ()->{
                     TimerSchedulerContext context = context(_uuid);
-                    notifyStarted(context);
-                    if (context.zeroed()) {
-                        context.end();
-                        callback.ended(context);
-                        cancel(_uuid);
-                        removeContext(_uuid);
-                    }
-                    else {
-                        callback.beat(context);
+                    if (context.reStarted())
+                        context.start();
+                    else if (context.started()) {
                         context.beat();
-                    }
+                        if (context.zeroed())
+                            contextZeroed(context, _uuid, callback);
+                        else if (!context.reStarted() && !context.zeroed() && !context.countIsTime())
+                            callback.beat(context.getProperties());
+                    } else
+                        notifyStarted(context);
                 },
                 _startDateTime,
                 _delay
@@ -89,12 +93,7 @@ public class TimerSchedulerService implements ITimerSchedulerService {
     }
 
     @Override
-    public void properties(@NotNull UUID _uuid, Map _properties) {
-        this.contexts.get(_uuid).setProperties(_properties);
-    }
-
-    @Override
-    public UUID restart(@NotNull UUID _uuid, @NotNull TimerSchedulerSettings _settings) {
+    public synchronized UUID restart(@NotNull UUID _uuid, @NotNull TimerSchedulerSettings _settings) {
         cancel(_uuid);
         context(_uuid).reset(_settings.getTime());
         ITimerScheduler callback = context(_uuid).callback();
@@ -108,14 +107,14 @@ public class TimerSchedulerService implements ITimerSchedulerService {
         this.cancel(_uuid);
         TimerSchedulerContext _context = context(_uuid);
         _context.stop();
-        _context.callback().stopped(_context);
+        _context.callback().stopped(_context.getProperties());
         removeContext(_uuid);
     }
 
     @Override
-    public UUID schedule(@NotNull TimerSchedulerSettings _settings, @NotNull ITimerScheduler _callback) {
+    public UUID schedule(@NotNull TimerSchedulerSettings _settings, @NotNull ITimerScheduler _callback, @NotNull Map _properties) {
         UUID uuid = generateUUID();
-        context(uuid, createContext(_settings.getTime(), _callback));
+        context(uuid, createContext(_settings.getTime(), _callback, _properties));
         ScheduledFuture future = createSchedule(uuid, _settings.getStartDateTime(), _settings.getDelay(), _callback);
         runner(uuid, future);
         return uuid;

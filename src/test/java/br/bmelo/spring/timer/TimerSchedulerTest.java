@@ -11,6 +11,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import java.util.Calendar;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
@@ -44,7 +46,8 @@ class TimerSchedulerTest implements ITimerScheduler {
 						2L,
 						1000L
 				),
-				this
+				this,
+				new HashMap()
 		);
 		await().
 				atMost(2, TimeUnit.SECONDS).
@@ -55,7 +58,7 @@ class TimerSchedulerTest implements ITimerScheduler {
 				pollInterval(1, TimeUnit.SECONDS).
 				until(() -> {return ended;});
 
-		Assert.assertEquals(2L, beat.longValue());
+		Assert.assertEquals(1L, beat.longValue());
 	}
 
 	@Test
@@ -68,7 +71,8 @@ class TimerSchedulerTest implements ITimerScheduler {
 						30L,
 						1000L
 				),
-				this
+				this,
+				new HashMap()
 		);
 		timerSchedulerService.stop(uuid);
 		await().
@@ -79,22 +83,22 @@ class TimerSchedulerTest implements ITimerScheduler {
 
 
 	@Override
-	public void ended(TimerSchedulerContext _context) {
+	public void ended(Map _context) {
 		ended = Boolean.TRUE;
 	}
 
 	@Override
-	public void stopped(TimerSchedulerContext _context) {
+	public void stopped(Map _context) {
 		stopped = Boolean.TRUE;
 	}
 
 	@Override
-	public void started(TimerSchedulerContext _context) {
+	public void started(Map _context) {
 		started = Boolean.TRUE;
 	}
 
 	@Override
-	public void beat(TimerSchedulerContext _context) {
+	public void beat(Map _context) {
 		beat++;
 	}
 }
